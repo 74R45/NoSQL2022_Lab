@@ -43,7 +43,7 @@ object Parsing {
       .map(seqData =>
         val attributes = Vector("id", "isolate", "haplogroup", "isolation_source", "country")
           .map(gp.find(_, seqData))
-        val regionCode = "[A-Za-z]+".r.findFirstIn(attributes(1)).get
+        val regionCode = processRegionCode(attributes(1))
         val country = attributes(4).split(": ")(0)
         val haplogroup = attributes(2).replaceAll("\\s+", " ").split("[()]")
         val region =
@@ -93,6 +93,13 @@ object Parsing {
 
   def removeUnnecessarySeq(seqs: Array[MtDNASequence]): Array[MtDNASequence] =
     seqs.filterNot(List("KT262553.1", "KT262558.1") contains _.id)
+
+  def processRegionCode(isolate: String): String =
+    "[A-Za-z]+".r.findFirstIn(isolate).get match {
+      case "KSTRG" => "KSTR"
+      case "SMLS" => "SML"
+      case x => x
+    }
 }
 
 case class FormatInfo(sep: String, getRegex: Map[String, Regex]) {
